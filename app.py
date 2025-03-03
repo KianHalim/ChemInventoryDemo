@@ -16,7 +16,7 @@ for i in range(num_materials):
     st.subheader(f"Material {i+1}")
 
     sds_number = st.text_input(f"Enter SDS # for Material {i+1}", key=f"sds_{i}")
-    
+
     # Check if SDS # is already entered
     if sds_number in sds_numbers:
         st.error(f"SDS # {sds_number} is already used. Each material must have a unique SDS #.")
@@ -30,20 +30,20 @@ for i in range(num_materials):
 
     cas_data = []
     cas_numbers = set()
-    total_percent = 0
+    total_percent = 0  # Tracks total CAS % ONLY
 
     for j in range(num_cas):
         cas_number = st.text_input(f"CAS # {j+1} for {material_name}", key=f"cas_{i}_{j}")
-        
+
         if cas_number in cas_numbers:
             st.error(f"Duplicate CAS # {cas_number} is not allowed for {material_name}. Please enter a unique CAS #.")
         else:
             cas_numbers.add(cas_number)
 
         cas_percent = st.number_input(f"% CAS {cas_number} in {material_name}", min_value=0.0, max_value=100.0, key=f"percent_{i}_{j}")
-        
+
         cas_data.append({"CAS Number": cas_number, "CAS %": cas_percent})
-        total_percent += cas_percent
+        total_percent += cas_percent  # Only sum CAS %, not order quantity
 
     # Validate CAS % sum
     if total_percent != 100:
@@ -79,10 +79,10 @@ if uploaded_file:
             csv_sds_numbers.add(sds_number)
 
         cas_data = []
-        total_percent = 0
+        total_percent = 0  # Reset total CAS % for each material
         cas_numbers = set()
 
-        for i in range(1, len(row) - 2, 2):  # Start from CAS #1, step by 2 (CAS % follows)
+        for i in range(3, len(row), 2):  # Start from CAS #1, step by 2 (CAS % follows)
             cas_number = row[i]
             cas_percent = row[i + 1]
 
@@ -92,13 +92,12 @@ if uploaded_file:
                 else:
                     cas_numbers.add(cas_number)
                     cas_data.append({"CAS Number": cas_number, "CAS %": cas_percent})
-                    total_percent += cas_percent
-        
+                    total_percent += cas_percent  # Ensure only CAS % is summed
+
         if total_percent != 100:
             st.error(f"Total CAS % for {material_name} (SDS {sds_number}) must be 100%. Current total: {total_percent}%")
 
         st.write(f"Processed: {material_name} (SDS {sds_number}) - Quantity: {order_quantity} lbs")
-
 
 
 
