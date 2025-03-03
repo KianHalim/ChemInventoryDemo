@@ -79,10 +79,10 @@ if uploaded_file:
             csv_sds_numbers.add(sds_number)
 
         cas_data = []
-        total_percent = 0  # Reset total CAS % for each material
+        total_percent = 0
         cas_numbers = set()
 
-        for i in range(3, len(row), 2):  # Start from CAS #1, step by 2 (CAS % follows)
+        for i in range(3, len(row) - 1, 2):  # Start from CAS #1, step by 2 (CAS % follows)
             cas_number = row[i]
             cas_percent = row[i + 1]
 
@@ -91,15 +91,17 @@ if uploaded_file:
                     st.error(f"Duplicate CAS # {cas_number} in {material_name} (SDS {sds_number}). Please correct the CSV.")
                 else:
                     cas_numbers.add(cas_number)
-                    cas_data.append({"CAS Number": cas_number, "CAS %": cas_percent})
-                    total_percent += cas_percent  # Ensure only CAS % is summed
+                    cas_usage = (order_quantity * cas_percent) / 100  # Calculate CAS usage in lbs
+                    cas_data.append({"CAS Number": cas_number, "CAS %": cas_percent, "CAS Usage (lbs)": cas_usage})
+                    total_percent += cas_percent
 
         if total_percent != 100:
             st.error(f"Total CAS % for {material_name} (SDS {sds_number}) must be 100%. Current total: {total_percent}%")
 
-        st.write(f"Processed: {material_name} (SDS {sds_number}) - Quantity: {order_quantity} lbs")
-
-
+        # Display processed data
+        st.subheader(f"Processed: {material_name} (SDS {sds_number}) - Quantity: {order_quantity} lbs")
+        for cas in cas_data:
+            st.write(f"CAS {cas['CAS Number']}: {cas['CAS Usage (lbs)']:.2f} lbs")
 
 
 
